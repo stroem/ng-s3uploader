@@ -1,0 +1,25 @@
+{
+  "name": "ng-s3uploader",
+  "version": "0.0.3",
+  "description": "Angular module for uploading images to Amazon S3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/stroem/ng-s3uploader.git"
+  },
+  "keywords": [
+    "angular",
+    "s3",
+    "image",
+    "upload"
+  ],
+  "author": "Jonathan Ström <jonathan.strom@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stroem/ng-s3uploader/issues"
+  },
+  "homepage": "https://github.com/stroem/ng-s3uploader"
+}

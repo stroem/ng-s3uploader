@@ -25,18 +25,17 @@ Make sure you include the javascript file in your index.html
 			self.write(json.dumps(data))
 
 		def __s3_upload_policy(self, expiration_date):
-
 			format_date = expiration_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 			content_length = 10 * 1024 * 1024
 
 			string_to_sign = {
 				"expiration": str(format_date),
 				"conditions": [
-					{"bucket": self.settings.get("aws_bucket")},
+					{"bucket": "<bucket_name>"},
 					["starts-with","$key",""],
-					{ "acl" : "public-read" },
-					[ "starts-with", "$Content-Type", "" ],
-					[ "content-length-range", 0 , content_length ]
+					{"acl" : "public-read"},
+					["starts-with", "$Content-Type", ""],
+					["content-length-range", 0 ,content_length]
 				]
 			}
 
@@ -56,4 +55,17 @@ Make sure you include the javascript file in your index.html
 	]
 
 ### Setup client (angularjs)
-...
+
+	var dataUri = "data:image/jpeg;base64," + rawImageDataBase64;
+	var options = {
+		bucket: "<bucket_name>",
+		folder: "images/",
+		acl: "public-read",
+		access_token_url: "/s3/access_token"
+	};
+
+	imageUploader.uploadFile(options, dataUri).then(function(url) {
+		console.info("Success: image url is " + url);
+	}, function(err) {
+		console.info("Error: " + err);
+	});

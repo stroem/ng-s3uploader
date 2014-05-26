@@ -12,6 +12,7 @@ Make sure you include the javascript file in your index.html
 
 ### Setup server (tornado web server)
 
+	:::python
 	class S3AccessToken(tornado.web.RequestHandler):
 
 		def get(self):
@@ -56,6 +57,7 @@ Make sure you include the javascript file in your index.html
 
 ### Setup client (angularjs)
 
+	:::javascript
 	var dataUri = "data:image/jpeg;base64," + rawImageDataBase64;
 	var options = {
 		bucket: "<bucket_name>",

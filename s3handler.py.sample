@@ -1,0 +1,71 @@
+import json
+import base64
+import datetime
+import hmac
+import hashlib
+import logging
+
+import tornado
+import tornado.httpserver
+import tornado.autoreload
+
+
+class S3AccessToken(tornado.web.RequestHandler):
+
+    def get(self):
+        expiration_date = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+        data = {
+            'policy': self.__s3_upload_policy(expiration_date),
+            'signature': self.__s3_upload_signature(expiration_date),
+            'key': self.settings.get('aws_key')
+        }
+
+        self.write(data)
+
+    def __s3_upload_policy(self, expiration_date):
+
+        format_date = expiration_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+        content_length = 10 * 1024 * 1024
+
+        string_to_sign = {
+            "expiration": str(format_date),
+            "conditions": [
+                {"bucket": self.settings.get("aws_bucket")},
+                ["starts-with", "$key", ""],
+                {"acl": "public-read"},
+                ["starts-with", "$Content-Type", ""],
+                ["content-length-range", 0, content_length]
+            ]
+        }
+
+        policy_json = json.dumps(string_to_sign)
+        return base64.b64encode(policy_json)
+
+    def __s3_upload_signature(self, expiration_date):
+        key = self.settings.get("aws_secret")
+        string_to_sign = self.__s3_upload_policy(expiration_date)
+        hash = hmac.new(key, string_to_sign, hashlib.sha1)
+        hash_digest = hash.digest()
+
+        return base64.b64encode(hash_digest)
+
+
+settings = {
+    'aws_secret': '<secret_key>',
+	'aws_key': '<aws_key>'
+}
+
+logging.info("Setting up HTTP server")
+application = tornado.wsgi.WSGIApplication([
+	(r'/s3/access_token', S3AccessToken)
+], '', **settings)
+
+http_server = tornado.httpserver.HTTPServer(tornado.wsgi.WSGIContainer(application))
+http_server.listen(8080)
+
+logging.info("Listening for connections on port 8080...")
+
+# Auto reload enabled
+logging.info("Lazy auotreload enabled")
+tornado.autoreload.start()
+tornado.ioloop.IOLoop.instance().start()
